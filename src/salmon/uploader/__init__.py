@@ -510,10 +510,7 @@ async def upload(
 
                 await print_torrents(gazelle_site, group_id, highlight_torrent_id=torrent_id)
 
-                if cfg.upload.yes_all or click.confirm(
-                    click.style("\nWould you like to check downconversion options?", fg="magenta"),
-                    default=True,
-                ):
+                if True:
                     selected_tasks = await prompt_downconversion_choice(rls_data, track_data)
                     if selected_tasks:
                         display_names = [task["name"] for task in selected_tasks]
@@ -640,10 +637,7 @@ async def edit_metadata(
                 else:
                     click.secho("Some files failed sanitization", fg="red", bold=True)
 
-        if cfg.upload.yes_all or click.confirm(
-            click.style("\nWould you like to upload the torrent? (No to re-run metadata section)", fg="magenta"),
-            default=True,
-        ):
+        if True:
             metadata["tags"] = convert_genres(metadata["genres"])
             break
 
