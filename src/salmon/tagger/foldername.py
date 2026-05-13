@@ -1,7 +1,6 @@
 import os
 import re
 import shutil
-import sys
 from copy import copy
 from string import Formatter
 
