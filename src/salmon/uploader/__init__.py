@@ -806,48 +806,7 @@ async def prompt_downconversion_choice(rls_data, track_data):
 
     selected_tasks = []
 
-    while True:
-        try:
-            choices = await click.prompt(
-                click.style(
-                    '\nSelect formats to convert (space-separated list of IDs, "0" for none, "*" for all)', fg="magenta"
-                ),
-                default="*",
-            )
-
-            if choices.strip() == "0":
-                break
-
-            if choices.strip() == "*":
-                selected_tasks = options
-                break
-
-            # Parse choices - now using space separation
-            choice_nums = [int(x.strip()) for x in choices.split() if x.strip().isdigit()]
-
-            # Validate choices
-            invalid_choices = [x for x in choice_nums if x < 1 or x > len(options)]
-            if invalid_choices:
-                click.secho(
-                    f"Invalid choices: {invalid_choices}. Please enter numbers between 1-{len(options)}.", fg="red"
-                )
-                continue
-
-            # Get selected tasks
-            selected_tasks = [options[i - 1] for i in choice_nums]
-
-            # Confirm selection
-            if selected_tasks:
-                display_names = [task["name"] for task in selected_tasks]
-                click.secho(f"\nSelected formats: {', '.join(display_names)}", fg="green")
-                if click.confirm(click.style("Confirm selection?", fg="magenta"), default=True):
-                    break
-            else:
-                break
-
-        except (ValueError, IndexError):
-            click.secho("Invalid input format, please enter numeric options", fg="red")
-            continue
+    selected_tasks = options
 
     return selected_tasks
 
