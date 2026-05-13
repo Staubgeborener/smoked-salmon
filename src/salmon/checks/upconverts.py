@@ -31,14 +31,7 @@ async def upload_upconvert_test(path: str) -> None:
     """
     any_upconverts = await test_upconverted(path)
     if any_upconverts:
-        if click.confirm(
-            click.style(
-                "Possible upconverts detected. Would you like to quit uploading?",
-                fg="red",
-            ),
-            default=True,
-        ):
-            raise click.Abort
+        raise click.Abort
     else:
         click.secho(
             click.style(
