@@ -244,6 +244,9 @@ async def _prompt_for_group_id(
     Returns:
         Group ID or None for new group.
     """
+    if results and offer_deletion:
+        click.echo("Similar release found. Deleting music folder.")
+        raise AbortAndDeleteFolder
     click.echo("Uploading to a new torrent group.")
     return None
 
