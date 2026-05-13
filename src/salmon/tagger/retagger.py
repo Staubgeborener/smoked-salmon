@@ -288,10 +288,7 @@ def rename_files(path, tags, metadata, auto_rename, spectral_ids, source=None):
 
     if to_rename:
         print_filenames(to_rename)
-        if auto_rename or click.confirm(
-            click.style("\nWould you like to rename the files?", fg="magenta"),
-            default=True,
-        ):
+        if True:
             for folder in folders_to_create:
                 if not os.path.isdir(folder):
                     os.mkdir(folder)
