@@ -99,68 +99,8 @@ async def _prompt_for_recent_upload_results(
             click.echo(f"| {gazelle_site.base_url}/torrents.php?torrentid={u[0]}")
 
     # Now prompt for user action
-    while True:
-        prompt_text = (
-            "\nWould you like to upload to an existing group?\n"
-            f"{'Pick from recent uploads found, p' if recent_uploads else 'P'}aste a URL"
-            f" or [N]ew group / [a]bort {'/ [d]elete music folder ' if offer_deletion else ''}"
-        )
-
-        group_id = await click.prompt(
-            click.style(prompt_text, fg="magenta"),
-            default="",
-        )
-
-        # Handle numeric input (selecting from recent uploads or direct group ID)
-        if group_id.strip().isdigit():
-            group_id_num = int(group_id)
-
-            if group_id_num == 0:
-                group_id_num = 1  # If the user types 0 give them the first choice.
-
-            # If user picks from recent uploads list
-            if recent_uploads and 1 <= group_id_num <= len(recent_uploads):
-                torrent_id = recent_uploads[group_id_num - 1][0]
-                # Need to convert torrent ID to group ID
-                try:
-                    result_group_id = await gazelle_site.get_redirect_torrentgroupid(torrent_id)
-                    if result_group_id is not None:
-                        return result_group_id
-                    click.echo("Could not get group ID from torrent ID.")
-                    continue
-                except Exception:
-                    click.echo("Could not get group ID from torrent ID.")
-                    continue
-            else:
-                # Direct group ID input
-                click.echo(f"Interpreting {group_id_num} as a group ID")
-                return group_id_num
-
-        # Handle URL input
-        elif group_id.strip().lower().startswith(gazelle_site.base_url + "/torrents.php"):
-            parsed_query = parse.parse_qs(parse.urlparse(group_id).query)
-            if "id" in parsed_query:
-                group_id = parsed_query["id"][0]
-                return int(group_id)
-            elif "torrentid" in parsed_query:
-                torrent_id = parsed_query["torrentid"][0]
-                result_group_id = await gazelle_site.get_redirect_torrentgroupid(torrent_id)
-                if result_group_id is not None:
-                    return result_group_id
-                click.echo("Could not get group ID from torrent ID.")
-                continue
-            else:
-                click.echo("Could not find group ID in URL.")
-                continue
-
-        # Handle action commands
-        elif group_id.lower().startswith("a"):
-            raise click.Abort
-        elif group_id.lower().startswith("d") and offer_deletion:
-            raise AbortAndDeleteFolder
-        elif group_id.lower().startswith("n") or not group_id.strip():
-            click.echo("Uploading to a new torrent group.")
-            return None
+    click.echo("Uploading to a new torrent group.")
+    return None
 
 
 async def check_existing_group(
@@ -302,45 +242,8 @@ async def _prompt_for_group_id(
     Returns:
         Group ID or None for new group.
     """
-    while True:
-        group_id = await click.prompt(
-            click.style(
-                "\nWould you like to upload to an existing group?\n"
-                f"Paste a URL{', pick from groups found ' if results is not None else ''}"
-                f"or [N]ew group / [a]bort {'/ [d]elete music folder ' if offer_deletion else ''}",
-                fg="magenta",
-            ),
-            default="",
-        )
-        if group_id.strip().isdigit():
-            raw_input = int(group_id)
-            list_index = max(0, raw_input - 1)  # 1-based → 0-based, clamp to 0
-            if list_index < len(results):
-                return int(results[list_index]["groupId"])
-            else:
-                click.echo(f"Interpreting {raw_input} as a group Id")
-                return raw_input
-
-        elif group_id.strip().lower().startswith(gazelle_site.base_url + "/torrents.php"):
-            parsed_query = parse.parse_qs(parse.urlparse(group_id).query)
-            if "id" in parsed_query:
-                return int(parsed_query["id"][0])
-            elif "torrentid" in parsed_query:
-                torrent_id = parsed_query["torrentid"][0]
-                result_group_id = await gazelle_site.get_redirect_torrentgroupid(torrent_id)
-                if result_group_id is not None:
-                    return result_group_id
-                continue
-            else:
-                click.echo("Could not find group ID in URL.")
-                continue
-        elif group_id.lower().startswith("a"):
-            raise click.Abort
-        elif group_id.lower().startswith("d") and offer_deletion:
-            raise AbortAndDeleteFolder
-        elif group_id.lower().startswith("n") or not group_id.strip():
-            click.echo("Uploading to a new torrent group.")
-            return None
+    click.echo("Uploading to a new torrent group.")
+    return None
 
 
 async def print_torrents(
