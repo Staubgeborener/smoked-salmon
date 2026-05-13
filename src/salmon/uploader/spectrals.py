@@ -486,20 +486,8 @@ async def upload_spectrals(
 async def prompt_spectrals(spectral_ids, lossy_master, check_lma, force_prompt_lossy_master=False):
     """Ask which spectral IDs the user wants to upload."""
     while True:
-        ids = (
-            "*"
-            if cfg.upload.yes_all and not force_prompt_lossy_master
-            else await click.prompt(
-                click.style(
-                    f"What spectral IDs would you like to upload to {cfg.image.specs_uploader}? "
-                    '(space-separated list of IDs, "0" for none, "*" for all, or "+" for a randomized selection)',
-                    fg="magenta",
-                ),
-                default=cfg.image.default_spectral_ids
-                if cfg.image.default_spectral_ids is not None
-                else ("*" if lossy_master else "+"),
-            )
-        )
+        ids = "*" if cfg.upload.yes_all and not force_prompt_lossy_master else "+"
+
         if ids.strip() == "+":
             all_ids = list(spectral_ids.keys())
             subset_size = max(1, len(all_ids) // 3)  # Ensure at least one ID is selected
