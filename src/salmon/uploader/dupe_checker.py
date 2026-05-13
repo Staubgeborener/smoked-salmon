@@ -94,11 +94,14 @@ async def _prompt_for_recent_upload_results(
         )
         click.secho(f" (searchstrs: {searchstr})", bold=True)
         for u_index, u in enumerate(recent_uploads[:5]):
-            click.echo(f" {u_index + 1:02d} >> ", nl=False)  # torrent_id
-            click.secho(f"{u[1]} - {u[2]} ", fg="cyan", nl=False)  # artist - title
+            click.echo(f" {u_index + 1:02d} >> ", nl=False)
+            click.secho(f"{u[1]} - {u[2]} ", fg="cyan", nl=False)
             click.echo(f"| {gazelle_site.base_url}/torrents.php?torrentid={u[0]}")
 
-    # Now prompt for user action
+    # Auto-answer
+    if recent_uploads and offer_deletion:
+        click.echo("Similar upload found. Deleting music folder.")
+        raise AbortAndDeleteFolder
     click.echo("Uploading to a new torrent group.")
     return None
 
