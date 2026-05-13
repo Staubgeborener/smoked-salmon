@@ -2,7 +2,6 @@ import asyncio
 import re
 from difflib import SequenceMatcher
 from typing import TYPE_CHECKING
-from urllib import parse
 
 import asyncclick as click
 
