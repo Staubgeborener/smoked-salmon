@@ -36,9 +36,7 @@ def rename_folder(path, metadata, auto_rename, check=True):
         click.echo(f"Old folder name        : {old_base}")
         click.echo(f"New pending folder name: {new_base}")
 
-        user_rename_choice = cfg.upload.yes_all or click.confirm(
-            click.style("\nWould you like to replace the original folder name?", fg="magenta"), default=True
-        )
+        user_rename_choice = True
 
         new_base = _edit_folder_interactive(new_base, auto_rename) if auto_rename or user_rename_choice else old_base
 
@@ -167,27 +165,4 @@ def _fix_format(metadata, keys):
 
 def _edit_folder_interactive(foldername, auto_rename):
     """Allow the user to edit the pending folder name in a text editor."""
-    if auto_rename:
-        return foldername
-    if not click.confirm(
-        click.style("Is the new folder name acceptable? ([n] to edit)", fg="magenta"),
-        default=True,
-    ):
-        newname = click.edit(foldername, editor=cfg.upload.default_editor)
-        while True:
-            if newname is None:
-                return foldername
-            elif re.search(BLACKLISTED_CHARS, newname):
-                if not click.confirm(
-                    click.style(
-                        "Folder name contains invalid characters, retry?",
-                        fg="magenta",
-                        bold=True,
-                    ),
-                    default=True,
-                ):
-                    sys.exit(1)
-            else:
-                return newname.strip().replace("\n", "")
-            newname = click.edit(foldername, editor=cfg.upload.default_editor)
     return foldername
