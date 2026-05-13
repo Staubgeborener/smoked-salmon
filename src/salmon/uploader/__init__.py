@@ -334,14 +334,7 @@ async def upload(
             click.secho("No MQA release detected", fg="green")
 
         if rls_data["encoding"] == "24bit Lossless" and not skip_up:
-            if not cfg.upload.yes_all:
-                if click.confirm(
-                    click.style("\n24bit detected. Do you want to check whether might be upconverted?", fg="magenta"),
-                    default=True,
-                ):
-                    await upload_upconvert_test(path)
-            else:
-                await upload_upconvert_test(path)
+            await upload_upconvert_test(path)
 
         if source == "CD" and not skip_log_check:
             click.secho("\nChecking logs", fg="green")
