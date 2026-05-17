@@ -2,6 +2,8 @@ import argparse
 import collections
 import os
 import posixpath
+import shutil
+import tempfile
 
 import anyio
 import asyncclick as click
@@ -31,7 +33,6 @@ def _resolve_shell_path(remote_folder: str, extra_args: list[str]) -> str:
         return posixpath.join(override.removeprefix("@"), remote_folder.removeprefix("/"))
     return override
 
-
 async def _rclone_upload_folder(seedbox: Seedbox, remote_folder: str, path: str) -> None:
     """Upload a local folder to a rclone remote.
 
@@ -41,16 +42,31 @@ async def _rclone_upload_folder(seedbox: Seedbox, remote_folder: str, path: str)
         path: Local folder path to upload.
     """
     remote_path = posixpath.join(remote_folder, os.path.basename(path))
-    commands = ["rclone", "copy", path, f"{seedbox.url}:{remote_path}", *seedbox.extra_args]
-    click.secho(f"Starting Rclone upload to {seedbox.url}:{remote_folder}", fg="cyan")
-    click.secho(f"Executing: {' '.join(commands)}", fg="yellow")
-    # Let rclone write directly to the terminal so flags like -P can render live progress output.
-    result = await anyio.run_process(commands, stdout=None, stderr=None, check=False)
-    if result.returncode == 0:
-        click.secho(f"Rclone upload successful: {path} to {seedbox.url}:{remote_path}", fg="green")
-    else:
-        click.secho(f"Rclone upload failed with exit code {result.returncode}", fg="red")
 
+    # Copy rclone config to a non-bind-mounted temp file so rclone can rename it
+    rclone_config_src = os.environ.get(
+        "RCLONE_CONFIG", os.path.expanduser("~/.config/rclone/rclone.conf")
+    )
+    tmp_config = None
+    extra_config_args: list[str] = []
+    if os.path.exists(rclone_config_src):
+        fd, tmp_config = tempfile.mkstemp(suffix=".conf")
+        os.close(fd)
+        shutil.copy2(rclone_config_src, tmp_config)
+        extra_config_args = ["--config", tmp_config]
+
+    try:
+        commands = ["rclone", "copy", *extra_config_args, path, f"{seedbox.url}:{remote_path}", *seedbox.extra_args]
+        click.secho(f"Starting Rclone upload to {seedbox.url}:{remote_folder}", fg="cyan")
+        click.secho(f"Executing: {' '.join(commands)}", fg="yellow")
+        result = await anyio.run_process(commands, stdout=None, stderr=None, check=False)
+        if result.returncode == 0:
+            click.secho(f"Rclone upload successful: {path} to {seedbox.url}:{remote_path}", fg="green")
+        else:
+            click.secho(f"Rclone upload failed with exit code {result.returncode}", fg="red")
+    finally:
+        if tmp_config and os.path.exists(tmp_config):
+            os.unlink(tmp_config)
 
 async def _add_to_downloader(
     client: TorrentClient,
